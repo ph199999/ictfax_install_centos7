@@ -1,0 +1,150 @@
+修改my sql root密码
+vi /etc/my.cnf
+加一句：
+skip-grant-tables
+重启msql
+service mysql restart
+#mysql -u root
+flush privileges;
+use mysql
+update user set authentication_string="" where user="root";
+exit
+vi /etc/my.cnf
+删除
+skip-grant-tables
+service mysql restart
+#mysql -u root
+alter user user() identified by "Huawei@123";  //后边是密码
+允许root用户可以远程连接
+use mysql
+update user set host='%' where user='root';
+mysql 5.7更改root密码
+use mysql 
+update user set authentication_string = password('Huawei@123'), password_expired = 'N', password_last_changed = now() where user = 'root';
+如果感觉连接mysql数据库很慢，就需要在my.cnf的[mysqld]字段下加一句
+[mysqld]
+skip-name-resolve
+修改数据库文件存储位置
+、创建目标路径
+
+mkdir -p /data/mysql
+
+2、关闭MySQL
+
+systemctl stop mysqld
+
+3、复制数据文件
+
+cp -arp /var/lib/mysql /data/mysql/.
+
+4、修改配置文件/etc/my.cnf
+
+将datadir和socket中的原路径修改为目标路径
+
+1
+2
+datadir=/data/mysql
+socket=/data/mysql/mysql.sock
+
+
+报错如下：
+
+Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock'
+
+解决：
+
+修改配置文件my.cnf,添加或修改如下配置：
+
+[client]
+socket = /data/mysql/mysql.sock
+给数据库授访问权限
+GRANT ALL PRIVILEGES ON ICD_WAS_SERVICE.* TO 'was'@'%';
+
+
+华为cms安装，
+1、要在chkdisk脚本中将检查hwshare空间的语句去掉
+2、mysql脚本的执行有问题 ，要手工修改
+3、linux下的表名是区分大小写的，要修改成不区分大小写，不然华为脚本中几乎所有表名都是小写的，初始化数据都会失败
+Linux下mysql默认区分大小写
+Windows下mysql默认不区分大小写
+查看是否区分大小写
+
+show variables like 'lower%'
+
+lower_case_table_names参数详解：
+lower_case_table_names = 0
+其中 0：区分大小写，1：不区分大小写
+MySQL在Linux下数据库名、表名、列名、别名大小写规则是这样的：
+　　 1、数据库名与表名是不区分大小写的；
+　　 2、表的别名是严格区分大小写的；
+　　 3、列名与列的别名在所有的情况下均是忽略大小写的；
+　　 4、变量名也是严格区分大小写的；
+
+修改不区分大小写,在my.cnf中的[mysqld]后面添加lower_case_table_names=1，重启MYSQL服务
+对于mysql8.0,需要将原有数据都清除以后才能重新初始化
+SHOW VARIABLES LIKE 'lower_case_%';
+
+rpm方法安装的默认配置文件是/etc/my.cnf
+
+[mysqld]
+
+datadir=/data/mysql       ----数据文件位置
+socket=/data/mysql/mysql.sock
+lower_case_table_names=1    忽略表名大小写
+log-error=/data/mysql/mysqld.log
+pid-file=/data/mysql/mysqld.pid
+#skip-grant-tables     -----如果忘记密码，可以加这个选项，这样就可以不用密码登录mysql
+[client]
+socket=/data/mysql/mysql.sock
+执行以下命令重新初始化数据
+mysqld --defaults-file=/etc/my.cnf --initialize --lower_case_table_names=1 --user=mysql --console
+
+suse12上安装mysql 5.7.32
+1、去https://downloads.mysql.com/archives/community/下载对应版本的mysql社区版本
+	mysql-5.7.32-1.sles12.x86_64.rpm-bundle.tar
+2、解包tar文件后开始安装
+	rpm -ivh mysql-community-common-5.7.32-1.sles12.x86_64.rpm
+	rpm -ivh mysql-community-libs-5.7.32-1.sles12.x86_64.rpm   //这里如果报缺少libatomic.so.1()(64bit) 错误，则需要挂载os光盘，安装相应的lib的rpm包 rpm -ivh libato*
+	rpm -Uvh mysql-community-devel-5.7.32-1.sles12.x86_64.rpm
+	rpm -Uvh mysql-community-client-5.7.32-1.sles12.x86_64.rpm
+	rpm -Uvh mysql-community-server-5.7.32-1.sles12.x86_64.rpm
+
+SUSE系统中通过本地挂载镜像， 用zypper安装软件:
+1.mount /home/iso/SLE-12-SP3-Server-DVD-x86_64-GMC-DVD1.iso /home/disk/
+2.zypper sl 列出源列表
+3.sudo zypper ar -f /home/disk suse  增加镜像源,命名suse
+4.zypper in libcap1   安装libcap1
+
+
+
+查看当前库默认编码格式
+
+mysql> show variables like '%char%';
+、将character_set_database和character_set_server设置为utf8
+
+mysql> set character_set_database=utf8;
+Query OK, 0 rows affected, 1 warning (0.02 sec)
+
+mysql> set character_set_server=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+改变表的字符集
+alter table xxx convert to character set utf8;
+
+
+如果某表中需要添加中文字符时
+需要在建库之前将character_set_database和character_set_server设置为utf8
+set character_set_database=utf8;
+set character_set_server=utf8;
+
+mysql删用户，不能直接删user表里的数据，需要用 drop user来删用户
+
+MySQL查看事件是否开启，设置启动时自动开启方法
+1.查看事件是否开启
+SHOW VARIABLES LIKE 'event_scheduler'
+2.设置当前事件开启
+SET GLOBAL event_scheduler = 1; 
+3.设置事件在mysql启动时自动开启方法
+我们先开启mysql事件.通过动态参数修改：SET GLOBAL event_scheduler = ON;注意：还是要在my.cnf中添加event_scheduler=ON。因为如果没有添加的话，mysql重启事件又会回到原来的状态了。
+变更连接权限
+grant all privileges on ICDBILL_SERVICE_HP.* to 'icd_bill'@'%' identified by '' with grant option;

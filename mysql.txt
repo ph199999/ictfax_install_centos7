@@ -1,0 +1,62 @@
+CentOS7的yum源中默认好像是没有mysql的。为了解决这个问题，我们要先下载mysql的repo源。
+1. 下载mysql的repo源
+$ wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+2. 安装mysql-community-release-el7-5.noarch.rpm包
+$ sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm
+安装这个包后，会获得两个mysql的yum repo源：/etc/yum.repos.d/mysql-community.repo，/etc/yum.repos.d/mysql-community-source.repo。
+3. 安装mysql
+$ sudo yum install mysql-server
+根据步骤安装就可以了，不过安装完成后，没有密码，需要重置密码。
+4. 重置密码
+重置密码前，首先要登录
+$ mysql -u root
+登录时有可能报这样的错：ERROR 2002 (HY000): Can‘t connect to local MySQL server through socket ‘/var/lib/mysql/mysql.sock‘ (2)，原因是/var/lib/mysql的访问权限问题。下面的命令把/var/lib/mysql的拥有者改为当前用户：
+$ sudo chown -R root:root /var/lib/mysql
+然后，重启服务：
+$ service mysqld restart
+接下来登录重置密码：
+$ mysql -u root
+mysql > use mysql;
+mysql > update user set password=password(‘123456‘) where user=‘root‘;
+mysql > exit;syste
+5. 开放3306端口
+$ sudo vim /etc/sysconfig/iptables
+添加以下内容：
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT
+保存后重启防火墙：
+$ sudo service iptables restart
+这样从其它客户机也可以连接上mysql服务了。
+
+修改的用户都以root为列（修改密码）
+一、拥有原来的myql的root的密码；
+
+方法一：
+在mysql系统外，使用mysqladmin
+# mysqladmin -u root -p password "test123"
+Enter password: 【输入原来的密码】
+方法二：
+通过登录mysql系统，
+# mysql -uroot -p
+Enter password: 【输入原来的密码】
+mysql>use mysql;
+mysql> update user set password=passworD("test") where user='root';
+mysql> flush privileges;
+mysql> exit;      
+
+flush privileges;
+select Host,User,authentication_string from user;
+update user set host = '%' where user ='root';
+ 
+二、忘记原来的myql的root的密码；
+首先，你必须要有操作系统的root权限了。要是连系统的root权限都没有的话，先考虑root系统再走下面的步骤。
+类似于安全模式登录系统，有人建议说是pkill mysql，但是我不建议哈。因为当你执行了这个命令后，会导致这样的状况：
+/etc/init.d/mysqld status
+mysqld dead but subsys locked
+这样即使你是在安全模式下启动mysql都未必会有用的，所以一般是这样/etc/init.d/mysqld stop，如果你不幸先用了pkill，那么就start一下再stop咯。
+# mysqld_safe --skip-grant-tables &
+&，表示在后台运行，不再后台运行的话，就再打开一个终端咯。
+# mysql
+mysql> use mysql;
+mysql> UPDATE user SET password=password("test123") WHERE user='root';  
+mysql> flush privileges;
+mysql> exit; 
