@@ -1,0 +1,28 @@
+yum install -y gcc gcc-c++ autoconf libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel glibc glibc-devel glib2 glib2-devel bzip2 bzip2-devel ncurses curl openssl-devel gdbm-devel db4-devel libXpm-devel libX11-devel gd-devel gmp-devel readline-devel libxslt-devel expat-devel xmlrpc-c xmlrpc-c-devel
+
+-------------------------------------------------
+cd /usr/local/src/php/php-5.3.28
+./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --enable-fpm --enable-sysvsem --enable-sockets --enable-pcntl --enable-mbstring --enable-mysqlnd --enable-opcache --enable-shmop --enable-zip --enable-ftp --enable-gd-native-ttf --enable-wddx --enable-soap
+make
+make install
+-------------------------------------------------
+cp /usr/local/php/etc/php-fpm.conf.default php-fpm.conf
+
+cp /usr/local/src/php/php-5.3.28/php.ini-development /usr/local/php/etc/php.ini-development
+
+cp /usr/local/php/etc/php.ini-development /usr/local/php/etc/php.ini
+
+cp /usr/local/src/php/php-5.3.28/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+-------------------------------------------------
+chmod +x /etc/init.d/php-fpm
+chkconfig --add php-fpm
+chkconfig --level 35 php-fpm on
+-------------------------------------------------
+cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+vim /usr/local/php/etc/php-fpm.conf 
+找到 ;pid = run/php-fpm.pid 去掉前面的分号
+-------------------------------------------------
+vim /etc/profile 
+底部添加
+PATH=$PATH:/usr/local/php/bin
+环境变量生效 source /etc/profile
