@@ -1,0 +1,6 @@
+本此安装基于centos7，推荐用Debian系统安装freeswitch
+1、安装步骤安装apache、mysql、php、freeswitch(1.10.2，高版本需要额外编译其它模块，推荐用低版本)
+2、当要安装ictcore和ictfax时先开启防火墙，不然安装会报错，安装完这两个之后再关闭防火墙即可。
+3、注意数据库database.sql的权限数据表的varchar(255)改成varchar(64)
+4、全部安装完之后记得修改/usr/ictcore/etc/odbc.ini和/etc/php.ini和/usr/ictcore/core/lib/DB.php和/etc/httpd/conf/httpd.conf文件中的数据库字段和位置指向
+5、记得在数据库表中调一下用户权限
