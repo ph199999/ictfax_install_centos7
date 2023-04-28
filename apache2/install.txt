@@ -1,0 +1,24 @@
+yum -y install gcc gcc-c++
+
+！！！！！！！！！！！！！！！！
+[root@localhost ~]# tar -xf apr-1.4.6.tar.gz
+[root@localhost ~]# cd apr-1.4.6
+[root@localhost apr-1.4.6]# ./configure --prefix=/usr/local/apr
+[root@localhost apr-1.4.6]# make && make install
+！！！！！！！！！！！！！！！！
+[root@localhost ~]# tar -xf apr-util-1.4.1.tar.gz
+[root@localhost ~]# cd apr-util-1.4.1
+[root@localhost apr-1.4.6]# ./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr
+[root@localhost apr-util-1.4.1]# make && make install
+！！！！！！！！！！！！！！！！
+[root@localhost ~]# tar -xf pcre-8.34.tar.gz
+[root@localhost ~]# cd pcre-8.34
+[root@localhost pcre-8.34]# ./configure --prefix=/usr/local/pcre
+[root@localhost pcre-8.34]# make && make install
+！！！！！！！！！！！！！！！！
+[root@localhost ~]# tar -xf httpd-2.4.54.tar.gz
+[root@localhost ~]# cd httpd-2.4.54
+[root@localhost httpd-2.4.54]# ./configure --prefix=/usr/local/apache2 --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util --with-pcre=/usr/local/pcre/bin/pcre-config
+[root@localhost httpd-2.4.54]# make && make install
+！！！！！！！！！！！！！！！！
+/usr/local/apache2/bin/apachectl start
